@@ -1,33 +1,24 @@
 package bantads.cliente.model;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
-@Entity
-@Table
-public class Cliente {
+public class ClienteDTO {
 
-    @Id
     private Long id;
-    @Column(nullable = false, unique = true)
     private String cpf;
-    @Column(nullable = false)
     private String nome;
-    @Column(nullable = false)
     private String email;
-    @Column
-    private Long idEndereco;
+    private Endereco endereco;
 
-    public Cliente() {
+    public ClienteDTO() {
     }
 
-    public Cliente(String cpf, String nome, String email, Long idEndereco) {
+    public ClienteDTO(String cpf, String nome, String email, Endereco endereco) {
         this.cpf = cpf;
         this.nome = nome;
         this.email = email;
-        this.idEndereco = idEndereco;
+        this.endereco = endereco;
     }
 
     public Long getId() {
@@ -62,11 +53,11 @@ public class Cliente {
         this.email = email;
     }
 
-    public Long getIdEndereco() {
-        return idEndereco;
+    public Endereco getEndereco() {
+        return endereco;
     }
 
-    public void setIdEndereco(Long idEndereco) {
-        this.idEndereco = idEndereco;
+    public void setEndereco(Endereco endereco) {
+        this.endereco = endereco;
     }
 }

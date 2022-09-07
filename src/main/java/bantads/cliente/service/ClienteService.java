@@ -1,11 +1,14 @@
 package bantads.cliente.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import bantads.cliente.model.ClienteDTO;
+import bantads.cliente.model.Endereco;
+import bantads.cliente.utils.Misc;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,43 +29,71 @@ public class ClienteService{
     @Autowired
     private EnderecoRepository enderecoRepository;
 
-    public List<Cliente> getClienteAll(){
-        List<Cliente> clientes = new ArrayList<>();
-        return clientes;
+    public List<Cliente> getAll(){
+        return clienteRepository.findAll();
     }
 
-    public Optional<Cliente> getClienteById(String cpfCliente){
-        Optional<Cliente> cliente = ClienteRepository.findClienteById(cpfCliente);
+    public ClienteDTO getById(Long id){
+        ModelMapper mapper = new ModelMapper();
+
+        Optional<Cliente> cliente = clienteRepository.findById(id);
         if(cliente.isEmpty()) throw new ClienteException("Cliente não encontrado(a)!", HttpStatus.NOT_FOUND);
-        else return cliente;
+
+        Optional<Endereco> endereco = enderecoRepository.findById(cliente.get().getIdEndereco());
+
+        ClienteDTO clienteDTO = mapper.map(cliente.get(), ClienteDTO.class);
+        endereco.ifPresent(value -> clienteDTO.setEndereco(mapper.map(value, Endereco.class)));
+
+        return clienteDTO;
     }
 
-    public Optional<Cliente> insertCliente(Cliente cliente) {
-        Optional<Cliente> exists = ClienteRepository.findClienteById(cliente.getCpf());
-        if(exists.isPresent()) throw new ClienteException("Este cliente já existe!", HttpStatus.BAD_REQUEST);
-        else{        
-            cliente = new Cliente();
-            cliente.setSalario(3000L);
+    public Cliente insert(ClienteDTO clienteDTO) {
+        ModelMapper mapper = new ModelMapper();
+        Cliente cliente = mapper.map(clienteDTO, Cliente.class);
+        Endereco endereco = mapper.map(clienteDTO.getEndereco(), Endereco.class);
 
-        log.info("Salvando novo cliente...");
-        }
-        return ClienteRepository.saveCliente(cliente);
+        endereco.setId(enderecoRepository.findFirstByOrderByIdDesc().map(value -> value.getId() + 1).orElse(1L));
+        log.info("Inserindo endereço do cliente com nome " + cliente.getNome());
+        endereco = enderecoRepository.save(endereco);
+
+        cliente.setIdEndereco(endereco.getId());
+
+        cliente.setId(clienteRepository.findFirstByOrderByIdDesc().map(value -> value.getId() + 1).orElse(1L));
+        log.info("Inserindo cliente com nome " + cliente.getNome());
+        return clienteRepository.save(cliente);
     }
 
-    public Optional<Cliente> updateCliente(Cliente cliente){
-        Optional<Cliente> exists = ClienteRepository.findClienteById(cliente.getCpf());
-        if(!exists.isPresent()) throw new ClienteException("Este cliente não encontrado!", HttpStatus.BAD_REQUEST);
-        else{        
-            Cliente c = new Cliente();
+    public Cliente update(ClienteDTO clienteDTO) {
+        if(clienteDTO.getId() == null)
+            throw new ClienteException("Id do cliente é obrigatório na atualização!", HttpStatus.BAD_REQUEST);
 
-        log.info("Atualizando cliente...");
-        }
-        return ClienteRepository.saveCliente(cliente);
+        Optional<Cliente> clienteOpt = clienteRepository.findById(clienteDTO.getId());
+        if(clienteOpt.isEmpty())
+            throw new ClienteException("Cliente com id "+clienteDTO.getId()+" inexistente!", HttpStatus.NOT_FOUND);
+        Cliente cliente = clienteOpt.get();
+
+        Misc.copyNonNullProperties(clienteDTO, cliente);
+
+        Optional<Endereco> enderecoOpt = enderecoRepository.findById(cliente.getIdEndereco());
+        enderecoOpt.ifPresent(newEndereco -> {
+            Misc.copyNonNullProperties(clienteDTO.getEndereco(), newEndereco);
+
+            log.info("Atualizando endereço do cliente com nome " + cliente.getNome());
+            enderecoRepository.save(newEndereco);
+        });
+
+        log.info("Atualizando cliente com nome " + cliente.getNome());
+        return clienteRepository.save(cliente);
     }
 
-    public String deleteClienteById(String cpfCliente){
-        Optional<Cliente> exists = clienteRepository.deleteClienteById(cpfCliente);
-        if(exists.isEmpty()) throw new ClienteException("Cliente não encontrado para exclusão da conta", HttpStatus.NOT_FOUND);
-        else return "Cliente deletado(a) com sucesso!";
+    public String deleteById(Long id){
+        Optional<Cliente> cliente = clienteRepository.findById(id);
+        if(cliente.isEmpty()) throw new ClienteException("Cliente não encontrado para exclusão!", HttpStatus.NOT_FOUND);
+
+        Optional<Endereco> endereco = enderecoRepository.findById(cliente.get().getIdEndereco());
+        endereco.ifPresent(value -> enderecoRepository.delete(value));
+
+        clienteRepository.delete(cliente.get());
+        return "Cliente deletado(a) com sucesso!";
     }
 }

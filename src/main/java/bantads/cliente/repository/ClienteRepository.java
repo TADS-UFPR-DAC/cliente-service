@@ -9,16 +9,5 @@ import bantads.cliente.model.Cliente;
 
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
-
-    static Optional<Cliente> findClienteById(String cpfCliente) {
-        
-        return null;
-    }
-
-    static Optional<Cliente> saveCliente(Cliente cliente) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    Optional<Cliente> deleteClienteById(String cpfCliente);
+    Optional<Cliente> findFirstByOrderByIdDesc();
 }

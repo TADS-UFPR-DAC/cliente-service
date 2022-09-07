@@ -1,12 +1,29 @@
 package bantads.cliente.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table
 public class Endereco {
+
+    @Id
+    private Long id;
+    @Column
     private String tipo;
+    @Column
     private String logradouro;
-    private int numero;
+    @Column
+    private Integer numero;
+    @Column
     private String complemento;
+    @Column
     private String cep;
+    @Column
     private String cidade;
+    @Column
     private String estado;
     
     public Endereco() {
@@ -21,6 +38,14 @@ public class Endereco {
         this.cep = cep;
         this.cidade = cidade;
         this.estado = estado;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTipo() {
@@ -39,11 +64,11 @@ public class Endereco {
         this.logradouro = logradouro;
     }
 
-    public int getNumero() {
+    public Integer getNumero() {
         return numero;
     }
 
-    public void setNumero(int numero) {
+    public void setNumero(Integer numero) {
         this.numero = numero;
     }
 

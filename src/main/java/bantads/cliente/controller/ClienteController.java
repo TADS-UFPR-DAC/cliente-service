@@ -1,6 +1,7 @@
 package bantads.cliente.controller;
 
 import bantads.cliente.model.Cliente;
+import bantads.cliente.model.ClienteDTO;
 import bantads.cliente.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -18,28 +18,29 @@ public class ClienteController {
     @Autowired
     ClienteService clienteService;
 
-    @GetMapping("/Cliente/{idCliente}")
-    public ResponseEntity<Optional<Cliente>> getClienteById(@PathVariable String cpfCliente) {
-        return ResponseEntity.ok().body(clienteService.getClienteById(cpfCliente));
+
+    @GetMapping("/listar")
+    public ResponseEntity<List<Cliente>> getAll() {
+        return ResponseEntity.ok().body(clienteService.getAll());
     }
 
-    @GetMapping("/Listar")
-    public ResponseEntity<List<Cliente>> getClienteAll() {
-        return ResponseEntity.ok().body(clienteService.getClienteAll());
+    @GetMapping("/{id}")
+    public ResponseEntity<ClienteDTO> getById(@PathVariable Long id) {
+        return ResponseEntity.ok().body(clienteService.getById(id));
     }
 
-    @PostMapping("/Inserir/")
-    public ResponseEntity<Optional<Cliente>> saveCliente(@RequestBody Cliente cliente) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.insereCliente(cliente));
+    @PostMapping("/")
+    public ResponseEntity<Object> insert(@RequestBody ClienteDTO cliente) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.insert(cliente));
     }
 
-    @PutMapping("/Atualizar/")
-    public ResponseEntity<Optional<Cliente>> updateCliente(@RequestBody Cliente cliente) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.atualizaCliente(cliente));
+    @PutMapping("/")
+    public ResponseEntity<Object> updateCliente(@RequestBody ClienteDTO cliente) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteService.update(cliente));
     }
 
-    @DeleteMapping("/Deletar/{idCliente}")
-    public ResponseEntity<String> deleteClienteById(@PathVariable String cpfCliente){
-        return ResponseEntity.ok(clienteService.deleteByIdCliente(cpfCliente));
+    @DeleteMapping("/{idCliente}")
+    public ResponseEntity<String> deleteById(@PathVariable Long id){
+        return ResponseEntity.ok(clienteService.deleteById(id));
     }
 }
