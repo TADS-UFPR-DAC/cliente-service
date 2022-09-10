@@ -10,15 +10,17 @@ public class ClienteDTO {
     private String nome;
     private String email;
     private Endereco endereco;
+    private String status;
 
     public ClienteDTO() {
     }
 
-    public ClienteDTO(String cpf, String nome, String email, Endereco endereco) {
+    public ClienteDTO(String cpf, String nome, String email, Endereco endereco, String status) {
         this.cpf = cpf;
         this.nome = nome;
         this.email = email;
         this.endereco = endereco;
+        this.status = status;
     }
 
     public Long getId() {
@@ -59,5 +61,13 @@ public class ClienteDTO {
 
     public void setEndereco(Endereco endereco) {
         this.endereco = endereco;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

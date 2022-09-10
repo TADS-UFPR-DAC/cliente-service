@@ -8,8 +8,7 @@ import static bantads.cliente.config.RabbitMQConfig.CHAVE_MENSAGEM;
 import static bantads.cliente.config.RabbitMQConfig.MENSAGEM_EXCHANGE;
 
 public class ClienteException extends ResponseStatusException {
-    public ClienteException(String message, HttpStatus httpStatus, AmqpTemplate rabbitTemplate) {
+    public ClienteException(String message, HttpStatus httpStatus) {
         super(httpStatus, message);
-        rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, "error");
     }
 }

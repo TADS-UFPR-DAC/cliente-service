@@ -43,4 +43,16 @@ public class ClienteController {
     public ResponseEntity<String> deleteById(@PathVariable Long id){
         return ResponseEntity.ok(clienteService.deleteById(id));
     }
+
+    @PutMapping("/aprovar")
+    public ResponseEntity<Object> aprovar(@RequestParam Long id) {
+        clienteService.aprovar(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/reprovar")
+    public ResponseEntity<Object> reprovar(@RequestParam Long id) {
+        clienteService.reprovar(id);
+        return ResponseEntity.ok().build();
+    }
 }

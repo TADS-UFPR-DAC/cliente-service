@@ -1,10 +1,12 @@
 package bantads.cliente.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import bantads.cliente.model.ClienteDTO;
 import bantads.cliente.model.Endereco;
+import bantads.cliente.model.Status;
 import bantads.cliente.utils.Misc;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +49,7 @@ public class ClienteService{
         Optional<Cliente> cliente = clienteRepository.findById(id);
         if(cliente.isEmpty()){
             rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, errorFormat("acharCliente"));
-            throw new ClienteException("Cliente não encontrado(a)!", HttpStatus.NOT_FOUND, rabbitTemplate);
+            throw new ClienteException("Cliente não encontrado(a)!", HttpStatus.NOT_FOUND);
         }
 
         Optional<Endereco> endereco = enderecoRepository.findById(cliente.get().getIdEndereco());
@@ -64,7 +66,7 @@ public class ClienteService{
                 clienteDTO.getNome() == null || clienteDTO.getNome().equals("") ||
                 clienteDTO.getEmail() == null || clienteDTO.getEmail().equals("")){
             rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, errorFormat("inserirCliente"));
-            throw new ClienteException("Campos faltando!", HttpStatus.BAD_REQUEST, rabbitTemplate);
+            throw new ClienteException("Campos faltando!", HttpStatus.BAD_REQUEST);
         }
         ModelMapper mapper = new ModelMapper();
         Cliente cliente = mapper.map(clienteDTO, Cliente.class);
@@ -76,6 +78,7 @@ public class ClienteService{
 
         cliente.setIdEndereco(endereco.getId());
         cliente.setId(clienteRepository.findFirstByOrderByIdDesc().map(value -> value.getId() + 1).orElse(1L));
+        cliente.setStatus(Status.PENDENTE.name());
 
         rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, successFormat("inserirCliente"));
         log.info("Inserindo cliente com nome " + cliente.getNome());
@@ -85,13 +88,13 @@ public class ClienteService{
     public Cliente update(ClienteDTO clienteDTO) {
         if(clienteDTO.getId() == null){
             rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, errorFormat("atualizarCliente"));
-            throw new ClienteException("Id do cliente é obrigatório na atualização!", HttpStatus.BAD_REQUEST, rabbitTemplate);
+            throw new ClienteException("Id do cliente é obrigatório na atualização!", HttpStatus.BAD_REQUEST);
         }
 
         Optional<Cliente> clienteOpt = clienteRepository.findById(clienteDTO.getId());
         if(clienteOpt.isEmpty()){
             rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, errorFormat("atualizarCliente"));
-            throw new ClienteException("Cliente com id "+clienteDTO.getId()+" inexistente!", HttpStatus.NOT_FOUND, rabbitTemplate);
+            throw new ClienteException("Cliente com id "+clienteDTO.getId()+" inexistente!", HttpStatus.NOT_FOUND);
         }
         Cliente cliente = clienteOpt.get();
 
@@ -114,7 +117,7 @@ public class ClienteService{
         Optional<Cliente> cliente = clienteRepository.findById(id);
         if(cliente.isEmpty()){
             rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, errorFormat("deletarCliente"));
-            throw new ClienteException("Cliente não encontrado para exclusão!", HttpStatus.NOT_FOUND, rabbitTemplate);
+            throw new ClienteException("Cliente não encontrado para exclusão!", HttpStatus.NOT_FOUND);
         }
 
         Optional<Endereco> endereco = enderecoRepository.findById(cliente.get().getIdEndereco());
@@ -123,6 +126,39 @@ public class ClienteService{
         rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, successFormat("deletarCliente"));
         clienteRepository.delete(cliente.get());
         return "Cliente deletado(a) com sucesso!";
+    }
+
+    public void aprovar(Long id){
+        Optional<Cliente> clienteOptional = clienteRepository.findById(id);
+        if(clienteOptional.isEmpty()){
+            rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, errorFormat("aprovarCliente"));
+            throw new ClienteException("Cliente não encontrado!", HttpStatus.NOT_FOUND);
+        }
+
+        Cliente cliente = clienteOptional.get();
+        if(!Objects.equals(cliente.getStatus(), Status.REPROVADO.name())) {
+            cliente.setStatus(Status.APROVADO.name());
+
+            rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, successFormat("aprovarCliente"));
+            clienteRepository.save(cliente);
+        }
+    }
+
+    public void reprovar(Long id){
+        Optional<Cliente> clienteOptional = clienteRepository.findById(id);
+        if(clienteOptional.isEmpty()){
+            rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, errorFormat("reprovarCliente"));
+            throw new ClienteException("Cliente não encontrado!", HttpStatus.NOT_FOUND);
+        }
+
+        Cliente cliente = clienteOptional.get();
+
+        if(!Objects.equals(cliente.getStatus(), Status.APROVADO.name())){
+            cliente.setStatus(Status.REPROVADO.name());
+
+            rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, successFormat("reprovarCliente"));
+            clienteRepository.save(cliente);
+        }
     }
 
     private String successFormat(String endpoint){

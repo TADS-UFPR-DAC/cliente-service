@@ -19,15 +19,19 @@ public class Cliente {
     private String email;
     @Column
     private Long idEndereco;
+    @Column(nullable = false)
+    private String status;
 
     public Cliente() {
     }
 
-    public Cliente(String cpf, String nome, String email, Long idEndereco) {
+    public Cliente(Long id, String cpf, String nome, String email, Long idEndereco, String status) {
+        this.id = id;
         this.cpf = cpf;
         this.nome = nome;
         this.email = email;
         this.idEndereco = idEndereco;
+        this.status = status;
     }
 
     public Long getId() {
@@ -68,5 +72,13 @@ public class Cliente {
 
     public void setIdEndereco(Long idEndereco) {
         this.idEndereco = idEndereco;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
