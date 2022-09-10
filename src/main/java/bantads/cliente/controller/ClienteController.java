@@ -28,6 +28,11 @@ public class ClienteController {
     public ResponseEntity<ClienteDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok().body(clienteService.getById(id));
     }
+    
+    @GetMapping("/cpf/{cpf}")
+    public ResponseEntity<ClienteDTO> getByCpf(@PathVariable String cpf) {
+        return ResponseEntity.ok().body(clienteService.getByCpf(cpf));
+    }
 
     @PostMapping("/")
     public ResponseEntity<Object> insert(@RequestBody ClienteDTO cliente) {

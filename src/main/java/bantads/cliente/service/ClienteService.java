@@ -58,6 +58,24 @@ public class ClienteService{
         rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, successFormat("acharCliente"));
         return clienteDTO;
     }
+    
+    public ClienteDTO getByCpf(String cpf){
+        ModelMapper mapper = new ModelMapper();
+
+        Optional<Cliente> cliente = clienteRepository.findByCpf(cpf);
+        if(cliente.isEmpty()){
+            rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, errorFormat("acharCliente"));
+            throw new ClienteException("Cliente não encontrado(a)!", HttpStatus.NOT_FOUND, rabbitTemplate);
+        }
+
+        Optional<Endereco> endereco = enderecoRepository.findById(cliente.get().getIdEndereco());
+
+        ClienteDTO clienteDTO = mapper.map(cliente.get(), ClienteDTO.class);
+        endereco.ifPresent(value -> clienteDTO.setEndereco(mapper.map(value, Endereco.class)));
+
+        rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, successFormat("acharCliente"));
+        return clienteDTO;
+    }
 
     public Cliente insert(ClienteDTO clienteDTO) {
         if(clienteDTO.getCpf() == null || clienteDTO.getCpf().equals("") ||
