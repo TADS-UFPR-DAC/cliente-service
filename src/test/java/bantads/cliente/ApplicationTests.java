@@ -1,4 +1,4 @@
-package br.ufpr.tads.dac.bantads;
+package bantads.cliente;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
