@@ -12,6 +12,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,8 +26,7 @@ import bantads.cliente.model.Cliente;
 import bantads.cliente.repository.ClienteRepository;
 import bantads.cliente.repository.EnderecoRepository;
 
-import static bantads.cliente.config.RabbitMQConfig.CHAVE_MENSAGEM;
-import static bantads.cliente.config.RabbitMQConfig.MENSAGEM_EXCHANGE;
+import static bantads.cliente.config.RabbitMQConfig.*;
 
 @Service
 public class ClienteService{
@@ -191,6 +195,14 @@ public class ClienteService{
                 "\"path\":\""+endpoint+"\"," +
                 "\"result\":\"error\"" +
                 "}";
+    }
+
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(FILA_DELETAR_CLIENTE),
+            exchange = @Exchange(name = CLIENTE_EXCHANGE),
+            key = CHAVE_DELETAR_CLIENTE))
+    public void deletarConta(final Message message, final Cliente cliente) {
+        log.info("Deletando cliente com id "+cliente.getId());
+        clienteRepository.delete(cliente);
     }
 
 }
