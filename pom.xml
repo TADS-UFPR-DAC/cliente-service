@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>bantads</groupId>
-	<artifactId>conta-service</artifactId>
+	<artifactId>cliente-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>bantads.conta.model.Cliente</name>
 	<description>Microsserviço bantads.conta.model.Cliente</description>
