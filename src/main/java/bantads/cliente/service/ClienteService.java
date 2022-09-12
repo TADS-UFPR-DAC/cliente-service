@@ -46,6 +46,11 @@ public class ClienteService{
         rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, successFormat("acharTodosClientes"));
         return clienteRepository.findAll();
     }
+    
+    public List<Cliente> findByStatus() {
+        rabbitTemplate.convertAndSend(MENSAGEM_EXCHANGE, CHAVE_MENSAGEM, successFormat("acharTodosClientes"));
+        return clienteRepository.findByStatus("PENDENTE");
+	}
 
     public ClienteDTO getById(Long id){
         ModelMapper mapper = new ModelMapper();

@@ -23,6 +23,11 @@ public class ClienteController {
     public ResponseEntity<List<Cliente>> getAll() {
         return ResponseEntity.ok().body(clienteService.getAll());
     }
+    
+    @GetMapping("/autocadastro")
+    public ResponseEntity<List<Cliente>> findByStatus() {
+        return ResponseEntity.ok().body(clienteService.findByStatus());
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ClienteDTO> getById(@PathVariable Long id) {
